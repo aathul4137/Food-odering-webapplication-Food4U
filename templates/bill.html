@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Order</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .order-summary {
+            background-color: #b6cfea;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .order-summary h4 {
+            margin-bottom: 20px;
+        }
+        .order-summary p {
+            margin: 0;
+        }
+        .order-summary span {
+            font-weight: bold;
+        }
+        .order-summary .amount-payable {
+            color: red;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 10;
+        }
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            z-index: 11;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Complete your order</h1>
+        <div class="order-summary" id="orderSummary">
+            <h4>Product(s):</h4>
+            <ul id="productList">
+                <!-- Products will be added here dynamically -->
+            </ul>
+            <p>Delivery Charge: <span>Free</span></p>
+            <p class="amount-payable" id="amountPayable">Amount Payable: $0.00</p>
+        </div>
+        <form onsubmit="event.preventDefault(); showCustomAlert();">
+            <div class="form-group">
+                <label for="name">Enter your name</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Enter your E-Mail</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter your E-Mail" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Enter your phone</label>
+                <input type="tel" class="form-control" id="phone" placeholder="Enter your phone" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Enter delivery address</label>
+                <textarea class="form-control" id="address" rows="3" placeholder="Enter delivery address" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="payment">Select Payment Mode</label>
+                <select class="form-control" id="payment" required>
+                    <option value="" disabled selected>-Select Payment Mode-</option>
+                    <option>Credit Card</option>
+                    <option>Debit Card</option>
+                    <option>Net Banking</option>
+                    <option>Cash on Delivery</option>
+                </select>
+            </div>
+            <center>
+            <div class="form-group">
+                <img src="{% static 'img/qr-code.png' %}"  class="center" style="height: 10cm;width: 10cm;">
+            </div>
+        </center>
+            <button type="submit" class="btn btn-danger btn-block">Place Order</button>
+        </form>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="custom-alert" id="customAlert">
+        <p>Amount paid!<br>Delivery within 1 hour<br>Thank you for your order</p>
+        <button class="btn btn-success" onclick="hideCustomAlert();">OK</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cart = JSON.parse(localStorage.getItem('cart'));
+            const total = localStorage.getItem('total');
+
+            if (cart && total) {
+                const productList = document.getElementById('productList');
+                cart.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.innerText = `${item.productName} - Qty: ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`;
+                    productList.appendChild(listItem);
+                });
+                document.getElementById('amountPayable').innerText = `Amount Payable: $${total}`;
+            }
+        });
+
+        function showCustomAlert() {
+            document.getElementById('customAlert').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function hideCustomAlert() {
+            document.getElementById('customAlert').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            window.location.href = "{% url 'index' %}"; 
+        }
+    </script>
+</body>
+</html>

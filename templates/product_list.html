@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <style>
+        a {
+            color: inherit;
+        }
+
+        .card {
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            --bg-filter-opacity: 0.0;
+            background-image: linear-gradient(rgba(0, 0, 0, var(--bg-filter-opacity)), rgba(0, 0, 0, var(--bg-filter-opacity))), var(--bg-img);
+            height: 12em;
+            width: 12em;
+            font-size: 1.5em;
+            color: white;
+            border-radius: 1em;
+            padding: 1em;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 5em -1em black;
+            transition: transform 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #ccc;
+            text-decoration: none;
+        }
+
+        .card:hover {
+            transform: scale(1.1);
+        }
+
+        .card-grid-space .num {
+            font-size: 3em;
+            position: relative;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+        }
+
+        .column {
+            float: left;
+            width: 25%;
+            padding: 2px;
+        }
+
+        h1 {
+            font-family: 'fantasy';
+            font-size: small;
+            color: white;
+            text-align: left;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        button {
+            font-size: small;
+            font-weight: bold;
+            align-self: flex-end;
+        }
+
+        .badge {
+            font-size: small;
+        }
+
+        header {
+            border-bottom: 1px solid #000;
+        }
+
+        header>h1 {
+            display: inline-block;
+        }
+
+        header span {
+            margin-left: 100px;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background-color: #f8f9fa;
+            padding: 15px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            display: none;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            display: flex;
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .cart-icon .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-light bg-light justify-content-between">
+            <a class="navbar-brand">Menu</a>
+            <form class="form-inline">
+                <span class="cart-icon" onclick="toggleCart()">🛒<span class="cart-count" id="cartCount">0</span></span>
+            </form>
+        </nav>
+    </header>
+
+    <div class="row">
+        {% for product in products %}
+        <div class="column">
+            <div class="card-grid-space">
+                {% for img in product.images.all %}
+                <a class="card" href="#" style="--bg-img: url({{ img.image.url }})">
+                    <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                        <div>
+                            <h1>{{ product.product_name }}</h1>
+                            <span class="badge text-bg-secondary bg-warning">{{ product.price }}</span>
+                        </div>
+                        <button class="btn btn-outline-success" onclick="addToCart('{{ product.product_name }}', '{{ img.image.url }}', '{{ product.price }}')">Add to Cart</button>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="sidebar" id="cartSidebar">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Cart</h3>
+            <button class="btn-close" onclick="toggleCart()">&times;</button>
+        </div>
+        <ul id="cartItems" class="list-group">
+            <!-- Cart items will be added here dynamically -->
+        </ul>
+        <div id="totalPrice" class="mt-3">Total: $0.00</div>
+        <button class="btn btn-primary mt-3" onclick="buyItems()">Buy</button>
+    </div>
+        
+    <script>
+        let cart = [];
+        let total = 0;
+    
+        function addToCart(productName, imageUrl, price) {
+            const existingItem = cart.find(item => item.productName === productName);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ productName, imageUrl, price, quantity: 1 });
+            }
+            updateCart();
+        }
+    
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+            total = 0;
+            let cartCount = 0;
+    
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+                cartCount += item.quantity;
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item');
+                listItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <img src="${item.imageUrl}" alt="${item.productName}" style="width: 50px; height: 50px;">
+                        <span>${item.productName}</span>
+                        <span>Qty: ${item.quantity}</span>
+                        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        <div>
+                            <button class="btn btn-sm btn-secondary" onclick="incrementQuantity('${item.productName}')">+</button>
+                            <button class="btn btn-sm btn-secondary" onclick="decrementQuantity('${item.productName}')">-</button>
+                        </div>
+                    </div>
+                `;
+                cartItems.appendChild(listItem);
+            });
+    
+            document.getElementById('totalPrice').innerText = `Total: $${total.toFixed(2)}`;
+            document.getElementById('cartCount').innerText = cartCount;
+        }
+    
+        function incrementQuantity(productName) {
+            const item = cart.find(item => item.productName === productName);
+            if (item) {
+                item.quantity += 1;
+                updateCart();
+            }
+        }
+    
+        function decrementQuantity(productName) {
+            const item = cart.find(item => item.productName === productName);
+            if (item) {
+                if (item.quantity > 1) {
+                    item.quantity -= 1;
+                } else {
+                    cart = cart.filter(item => item.productName !== productName);
+                }
+                updateCart();
+            }
+        }
+    
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cartSidebar');
+            cartSidebar.classList.toggle('open');
+        }
+    
+        function buyItems() {
+            if (cart.length > 0) {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.setItem('total', total.toFixed(2));
+                window.location.href = "{% url 'bill' %}";
+            } else {
+                alert('Your cart is empty!');
+            }
+        }
+    </script>
+    </body>
+
+</html>
